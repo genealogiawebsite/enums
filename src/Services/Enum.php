@@ -3,13 +3,14 @@
 namespace LaravelEnso\Enums\Services;
 
 use Illuminate\Support\Collection;
+use LaravelEnso\Enums\Exceptions\Enum as Exception;
 use ReflectionClass;
 
 class Enum
 {
     protected static array $data;
-
     protected static bool $localisation = true;
+    protected static bool $validatesKeys = false;
 
     public static function constants(): array
     {
@@ -21,6 +22,10 @@ class Enum
 
     public static function get($key)
     {
+        if (static::$validatesKeys && ! self::has($key)) {
+            throw Exception::keyNotFound();
+        }
+
         return self::attributes()->get($key);
     }
 
@@ -71,9 +76,13 @@ class Enum
             ->values();
     }
 
-    public static function localisation($state = true): void
+    public static function localisation(bool $state = true, bool $global = true): void
     {
-        self::$localisation = $state;
+        if ($global) {
+            self::$localisation = $state;
+        } else {
+            static::$localisation = $state;
+        }
     }
 
     protected static function data(): array
@@ -106,7 +115,7 @@ class Enum
 
     private static function trans($value)
     {
-        return is_string($value) && self::$localisation
+        return is_string($value) && static::$localisation
             ? __($value)
             : $value;
     }
