@@ -3,6 +3,7 @@
 namespace LaravelEnso\Enums\Services;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 
 class Enums
 {
@@ -15,15 +16,14 @@ class Enums
 
     public function register($enums)
     {
-        (new Collection($enums))->each(fn ($enum, $key) => $this->enums->put(
-            $key,
-            is_array($enum) ? $enum : $enum::all()
-        ));
+        Collection::wrap($enums)->each(fn ($enum, $key) => $this->enums
+            ->put($key, is_array($enum) ? $enum : App::make($enum)::all()));
     }
 
     public function remove($aliases)
     {
-        (new Collection($aliases))->each(fn ($alias) => $this->enums->forget($alias));
+        Collection::wrap($aliases)
+            ->each(fn ($alias) => $this->enums->forget($alias));
     }
 
     public function all()
