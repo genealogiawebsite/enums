@@ -97,12 +97,12 @@ class Enum
 
     private static function source(): array
     {
-        if (isset(static::$data)) {
-            return static::$data;
-        }
-
         if (! empty(static::data())) {
             return static::data();
+        }
+
+        if (isset(static::$data)) {
+            return static::$data;
         }
 
         return static::constants();
